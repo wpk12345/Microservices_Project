@@ -32,6 +32,25 @@ public class BookServiceController {
         return bookService.saveBook(book);
     }
 
+    @RequestMapping(value = "/send", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public String send() {
+        return bookService.sendingStr();
+    }
+
+    @RequestMapping(value = "/sendo", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public Note sendO() {
+        return bookService.sendingObj();
+    }
+
+    @RequestMapping(value = "/sendl", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<Note> sendl() {
+        return bookService.sendingList();
+    }
+
+
     @RequestMapping(value = "/books", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public List<BookViewModel> getAllBooks() {

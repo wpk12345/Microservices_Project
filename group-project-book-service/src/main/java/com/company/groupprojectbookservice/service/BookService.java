@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -27,12 +28,43 @@ public class BookService {
     private RabbitTemplate rabbitTemplate;
 
     public static final String EXCHANGE = "queue-note-exchange";
-    public static final String ROUTING_KEY = "note.list.add.book.controller";
+    public static final String ROUTING_KEY1 = "note.list.add.str";
+    public static final String ROUTING_KEY2 = "note.list.obj.obj";
+    public static final String ROUTING_KEY3 = "note.obj.#";
+
 
     public BookService(BookDao bookDao, RabbitTemplate rabbitTemplate)
     {
         this.bookDao = bookDao;
         this.rabbitTemplate = rabbitTemplate;
+    }
+
+    public String sendingStr()
+    {
+        String str = "SENDING MESSAGE FOR TESTING";
+        System.out.println(str);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY1, str);
+        return str;
+    }
+
+    public Note sendingObj()
+    {
+        Note note = new Note(1,1,"HI");
+        System.out.println(note);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, note);
+        return note;
+    }
+
+    public List<Note> sendingList()
+    {
+        Note note1 = new Note(1,1,"HI1");
+        Note note2 = new Note(2,1,"HI2");
+
+        List<Note> noteList = new ArrayList<>(Arrays.asList(note1, note2));
+
+        System.out.println(noteList);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY3, noteList);
+        return noteList;
     }
 
     @Transactional
@@ -51,7 +83,6 @@ public class BookService {
                 forEach(n ->
                 {
                     n.setBookId(bookViewModel.getBookId());
-                    rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, "SENDING BY VIJAYA");
                     n = noteClient.createNote(n);
                 });
 
