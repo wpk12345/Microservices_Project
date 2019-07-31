@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import java.util.Objects;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@noteId", scope = Note.class)
 public class Note {
     private int noteId;
     private int bookId;
