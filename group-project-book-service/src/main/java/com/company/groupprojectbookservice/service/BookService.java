@@ -83,6 +83,7 @@ public class BookService {
                 forEach(n ->
                 {
                     n.setBookId(bookViewModel.getBookId());
+                    rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, n);
                     n = noteClient.createNote(n);
                 });
 
@@ -151,6 +152,7 @@ public class BookService {
                 .forEach(n ->
                 {
                     n.setBookId(bookViewModel.getBookId());
+                    rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, n);
                     n = noteClient.createNote(n);
                 });
     }
