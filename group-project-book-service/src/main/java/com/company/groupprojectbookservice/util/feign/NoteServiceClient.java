@@ -33,4 +33,6 @@ public interface NoteServiceClient {
     @RequestMapping(value = "/notes/{id}", method = RequestMethod.DELETE)
     public void deleteNote(@PathVariable int id);
 
+    @RequestMapping(value = "/notes/send", method = RequestMethod.GET)
+    public Note getNoteVijaya(@RequestBody Note note);
 }

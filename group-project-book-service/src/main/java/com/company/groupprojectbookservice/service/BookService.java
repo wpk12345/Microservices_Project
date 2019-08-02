@@ -28,9 +28,9 @@ public class BookService {
     private RabbitTemplate rabbitTemplate;
 
     public static final String EXCHANGE = "queue-note-exchange";
-    public static final String ROUTING_KEY1 = "note.list.add.str";
-    public static final String ROUTING_KEY2 = "note.list.obj.obj";
-    public static final String ROUTING_KEY3 = "note.obj.#";
+    public static final String ROUTING_KEY1 = "note.str.str";
+    public static final String ROUTING_KEY_FOR_OBJECT = "note.obj.obj";
+    public static final String ROUTING_KEY_FOR_LIST_OF_OBJECTS = "note.list.obj";
 
 
     public BookService(BookDao bookDao, RabbitTemplate rabbitTemplate)
@@ -47,11 +47,11 @@ public class BookService {
         return str;
     }
 
-    public Note sendingObj()
+    public Note sendingObj(Note note)
     {
-        Note note = new Note(1,1,"HI");
+//        note = new Note(1,1,"HI");
         System.out.println(note);
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, note);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_FOR_OBJECT, note);
         return note;
     }
 
@@ -63,7 +63,7 @@ public class BookService {
         List<Note> noteList = new ArrayList<>(Arrays.asList(note1, note2));
 
         System.out.println(noteList);
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY3, noteList);
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_FOR_LIST_OF_OBJECTS, noteList);
         return noteList;
     }
 
@@ -77,18 +77,17 @@ public class BookService {
         book = bookDao.createBook(book);
         bookViewModel.setBookId(book.getBookId());
 
-        List<Note> notes = bookViewModel.getNotes();
-
-        notes.stream().
+        List<Note> noteList = new ArrayList<>();
+        bookViewModel.getNotes().stream().
                 forEach(n ->
                 {
                     n.setBookId(bookViewModel.getBookId());
-                    rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, n);
-                    n = noteClient.createNote(n);
+                    noteList.add(n);
                 });
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_FOR_LIST_OF_OBJECTS, noteList);
 
-        notes = noteClient.getNoteByBookId(bookViewModel.getBookId());
-        bookViewModel.setNotes(notes);
+//        notes = noteClient.getNoteByBookId(bookViewModel.getBookId());
+//        bookViewModel.setNotes(notes);
 
         return bookViewModel;
     }
@@ -140,21 +139,8 @@ public class BookService {
         book.setAuthor(bookViewModel.getAuthor());
 
         bookDao.updateBook(book);
-
-        // We don't know if any track have been removed so delete all associated tracks
-        // and then associate the tracks in the viewModel with the album
-        List<Note> noteList = noteClient.getNoteByBookId(book.getBookId());
-        noteList.stream()
-                .forEach(note -> noteClient.deleteNote(note.getNoteId()));
-
-        List<Note> notes = bookViewModel.getNotes();
-        notes.stream()
-                .forEach(n ->
-                {
-                    n.setBookId(bookViewModel.getBookId());
-                    rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY2, n);
-                    n = noteClient.createNote(n);
-                });
+        List<Note> noteList = bookViewModel.getNotes();
+        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_FOR_LIST_OF_OBJECTS, noteList);
     }
 
     @Transactional

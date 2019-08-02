@@ -40,8 +40,8 @@ public class BookServiceController {
 
     @RequestMapping(value = "/sendo", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
-    public Note sendO() {
-        return bookService.sendingObj();
+    public Note sendO(@RequestBody Note note) {
+        return bookService.sendingObj(note);
     }
 
     @RequestMapping(value = "/sendl", method = RequestMethod.GET)
